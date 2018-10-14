@@ -1,3 +1,6 @@
+extern crate env_logger;
+extern crate log;
+
 extern crate semver;
 
 extern crate serde;
@@ -17,6 +20,8 @@ use xml::writer::EventWriter;
 use checkstyle::CheckstyleDoc;
 
 fn main() {
+    env_logger::init();
+
     let stdin = io::stdin();
     let stdin = stdin.lock();
     let checkstyle = CheckstyleDoc::from_reader(stdin).expect("I/O error when reading input");
