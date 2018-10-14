@@ -27,10 +27,26 @@ fn main() {
             continue;
         }
         let msg: Message = serde_json::from_str(&line).unwrap();
+        checkstyle.append_message(&msg);
+    }
+
+    let stdout = io::stdout();
+    let stdout = stdout.lock();
+    let mut xml = EventWriter::new(stdout);
+    checkstyle.write_xml(&mut xml).expect("Error writing XML");
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CheckstyleDoc {
+    pub files: HashMap<String, CheckstyleFile>,
+}
+
+impl CheckstyleDoc {
+    fn append_message(&mut self, msg: &Message) {
         let msg = if let Message::FromCompiler(msg) = msg {
             msg
         } else {
-            continue;
+            return;
         };
         let (file, column, line) = if let Some(ref span) = msg.message.spans.get(0) {
             (
@@ -49,7 +65,7 @@ fn main() {
             ErrorLevel::Help => "info",
             ErrorLevel::Other(_) => "error",
         };
-        let file_entry = checkstyle.files.entry(file).or_default();
+        let file_entry = self.files.entry(file).or_default();
         file_entry.errors.push(CheckstyleError {
             column: column,
             line: line,
@@ -58,19 +74,6 @@ fn main() {
             source: msg.message.code.as_ref().map(|code| code.code.clone()),
         });
     }
-
-    let stdout = io::stdout();
-    let stdout = stdout.lock();
-    let mut xml = EventWriter::new(stdout);
-    checkstyle.write_xml(&mut xml).expect("Error writing XML");
-}
-
-#[derive(Debug, Clone, Default)]
-pub struct CheckstyleDoc {
-    pub files: HashMap<String, CheckstyleFile>,
-}
-
-impl CheckstyleDoc {
     fn write_xml<W: Write>(&self, xml: &mut EventWriter<W>) -> Result<(), EmitterError> {
         xml.write(XmlEvent::start_element("checkstyle"))?;
         for (filename, file) in &self.files {
