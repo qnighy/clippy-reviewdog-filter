@@ -59,7 +59,7 @@ impl CheckstyleDoc {
         let mut message = msg.message.message.clone();
         if opts.include_rendered {
             if let Some(ref rendered) = msg.message.rendered {
-                message.push_str("\n\n```");
+                message.push_str("\n\n```\n");
                 message.push_str(rendered);
                 message.push_str("\n```\n");
             }
