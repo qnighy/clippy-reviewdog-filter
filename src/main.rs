@@ -29,8 +29,11 @@ fn main() {
         .version("0.1.0")
         .author("Masaki Hara <ackie.h.gmai@gmail.com>")
         .about("Converts cargo check / cargo clippy output into checkstyle-like XML.")
-        .arg(Arg::with_name("include-rendered").help("include rendered messages"))
-        .get_matches();
+        .arg(
+            Arg::with_name("include-rendered")
+                .long("include-rendered")
+                .help("include rendered messages"),
+        ).get_matches();
 
     let options = checkstyle::Options {
         include_rendered: args.is_present("include-rendered"),
