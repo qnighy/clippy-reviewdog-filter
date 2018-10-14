@@ -17,7 +17,7 @@ pub mod message;
 
 use std::io;
 
-use clap::App;
+use clap::{App, Arg};
 use xml::writer::EventWriter;
 
 use checkstyle::CheckstyleDoc;
@@ -25,15 +25,21 @@ use checkstyle::CheckstyleDoc;
 fn main() {
     env_logger::init();
 
-    let _args = App::new("clippy-reviewdog-filter")
+    let args = App::new("clippy-reviewdog-filter")
         .version("0.1.0")
         .author("Masaki Hara <ackie.h.gmai@gmail.com>")
         .about("Converts cargo check / cargo clippy output into checkstyle-like XML.")
+        .arg(Arg::with_name("include-rendered").help("include rendered messages"))
         .get_matches();
+
+    let options = checkstyle::Options {
+        include_rendered: args.is_present("include-rendered"),
+    };
 
     let stdin = io::stdin();
     let stdin = stdin.lock();
-    let checkstyle = CheckstyleDoc::from_reader(stdin).expect("I/O error when reading input");
+    let checkstyle =
+        CheckstyleDoc::from_reader(stdin, &options).expect("I/O error when reading input");
 
     let stdout = io::stdout();
     let stdout = stdout.lock();
@@ -49,8 +55,11 @@ mod tests {
 
     #[test]
     fn test_from_reader() -> io::Result<()> {
+        let options = checkstyle::Options {
+            include_rendered: false,
+        };
         let reader = Cursor::new(include_bytes!("sample.txt").to_vec());
-        let checkstyle = CheckstyleDoc::from_reader(reader)?;
+        let checkstyle = CheckstyleDoc::from_reader(reader, &options)?;
         assert_eq!(checkstyle.files.len(), 1);
         let file = &checkstyle.files["src/main.rs"];
         assert_eq!(file.errors.len(), 2);

@@ -7,13 +7,18 @@ use xml::writer::{Error as EmitterError, EventWriter, XmlEvent};
 use message::compiler_message::ErrorLevel;
 use message::Message;
 
+#[derive(Debug, Clone)]
+pub struct Options {
+    pub include_rendered: bool,
+}
+
 #[derive(Debug, Clone, Default)]
 pub struct CheckstyleDoc {
     pub files: HashMap<String, CheckstyleFile>,
 }
 
 impl CheckstyleDoc {
-    pub fn from_reader<R: BufRead>(r: R) -> io::Result<Self> {
+    pub fn from_reader<R: BufRead>(r: R, opts: &Options) -> io::Result<Self> {
         let mut checkstyle = Self::default();
 
         for line in r.lines() {
@@ -22,12 +27,12 @@ impl CheckstyleDoc {
                 continue;
             }
             let msg: Message = serde_json::from_str(&line)?;
-            checkstyle.append_message(&msg);
+            checkstyle.append_message(&msg, opts);
         }
         Ok(checkstyle)
     }
 
-    pub fn append_message(&mut self, msg: &Message) {
+    pub fn append_message(&mut self, msg: &Message, opts: &Options) {
         let msg = if let Message::FromCompiler(msg) = msg {
             msg
         } else {
@@ -51,10 +56,18 @@ impl CheckstyleDoc {
             ErrorLevel::Other(_) => "error",
         };
         let file_entry = self.files.entry(file).or_default();
+        let mut message = msg.message.message.clone();
+        if opts.include_rendered {
+            if let Some(ref rendered) = msg.message.rendered {
+                message.push_str("\n\n```");
+                message.push_str(rendered);
+                message.push_str("\n```\n");
+            }
+        }
         file_entry.errors.push(CheckstyleError {
             column: column,
             line: line,
-            message: msg.message.message.clone(),
+            message: message,
             severity: severity.to_owned(),
             source: msg.message.code.as_ref().map(|code| code.code.clone()),
         });
