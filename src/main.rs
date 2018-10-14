@@ -49,18 +49,14 @@ fn main() {
             ErrorLevel::Help => "info",
             ErrorLevel::Other(_) => "error",
         };
-        checkstyle
-            .files
-            .entry(file)
-            .or_default()
-            .errors
-            .push(CheckstyleError {
-                column: column,
-                line: line,
-                message: msg.message.message.clone(),
-                severity: severity.to_owned(),
-                source: msg.message.code.as_ref().map(|code| code.code.clone()),
-            });
+        let file_entry = checkstyle.files.entry(file).or_default();
+        file_entry.errors.push(CheckstyleError {
+            column: column,
+            line: line,
+            message: msg.message.message.clone(),
+            severity: severity.to_owned(),
+            source: msg.message.code.as_ref().map(|code| code.code.clone()),
+        });
     }
 
     let stdout = io::stdout();
