@@ -1,6 +1,7 @@
 use std::collections::HashMap;
-use std::io::Write;
+use std::io::{self, BufRead, Write};
 
+use serde_json;
 use xml::writer::{Error as EmitterError, EventWriter, XmlEvent};
 
 use message::compiler_message::ErrorLevel;
@@ -12,6 +13,20 @@ pub struct CheckstyleDoc {
 }
 
 impl CheckstyleDoc {
+    pub fn from_reader<R: BufRead>(r: R) -> io::Result<Self> {
+        let mut checkstyle = Self::default();
+
+        for line in r.lines() {
+            let line = line?;
+            if !line.starts_with("{") {
+                continue;
+            }
+            let msg: Message = serde_json::from_str(&line)?;
+            checkstyle.append_message(&msg);
+        }
+        Ok(checkstyle)
+    }
+
     pub fn append_message(&mut self, msg: &Message) {
         let msg = if let Message::FromCompiler(msg) = msg {
             msg
