@@ -62,7 +62,7 @@ fn main() {
     let stdout = io::stdout();
     let stdout = stdout.lock();
     let mut xml = EventWriter::new(stdout);
-    checkstyle.write_xml(&mut xml).unwrap();
+    checkstyle.write_xml(&mut xml).expect("Error writing XML");
 }
 
 #[derive(Debug, Clone, Default)]
