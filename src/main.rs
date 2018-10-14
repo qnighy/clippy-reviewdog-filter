@@ -1,6 +1,8 @@
 extern crate env_logger;
 extern crate log;
 
+extern crate clap;
+
 extern crate semver;
 
 extern crate serde;
@@ -15,12 +17,19 @@ pub mod message;
 
 use std::io;
 
+use clap::App;
 use xml::writer::EventWriter;
 
 use checkstyle::CheckstyleDoc;
 
 fn main() {
     env_logger::init();
+
+    let _args = App::new("clippy-reviewdog-filter")
+        .version("0.1.0")
+        .author("Masaki Hara <ackie.h.gmai@gmail.com>")
+        .about("Converts cargo check / cargo clippy output into checkstyle-like XML.")
+        .get_matches();
 
     let stdin = io::stdin();
     let stdin = stdin.lock();
