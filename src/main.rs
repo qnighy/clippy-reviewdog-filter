@@ -19,7 +19,7 @@ use message::Message;
 
 fn main() {
     let stdin = Cursor::new(include_bytes!("sample.txt").to_vec());
-    let mut files: HashMap<String, Vec<_>> = HashMap::new();
+    let mut checkstyle = CheckstyleDoc::default();
 
     for line in stdin.lines() {
         let line = line.expect("I/O error when reading input");
@@ -49,41 +49,60 @@ fn main() {
             ErrorLevel::Help => "info",
             ErrorLevel::Other(_) => "error",
         };
-        files.entry(file).or_default().push(CheckstyleError {
-            column: column,
-            line: line,
-            message: msg.message.message.clone(),
-            severity: severity.to_owned(),
-            source: msg.message.code.as_ref().map(|code| code.code.clone()),
-        });
+        checkstyle
+            .files
+            .entry(file)
+            .or_default()
+            .errors
+            .push(CheckstyleError {
+                column: column,
+                line: line,
+                message: msg.message.message.clone(),
+                severity: severity.to_owned(),
+                source: msg.message.code.as_ref().map(|code| code.code.clone()),
+            });
     }
 
     let stdout = io::stdout();
     let stdout = stdout.lock();
     let mut xml = EventWriter::new(stdout);
-    xml.write(XmlEvent::start_element("checkstyle")).unwrap();
-    for (file, errors) in &files {
-        xml.write(XmlEvent::start_element("file").attr("name", file))
-            .unwrap();
-        for error in errors {
-            let column = error.column.to_string();
-            let line = error.line.to_string();
-            let elem = XmlEvent::start_element("error")
-                .attr("column", &column)
-                .attr("line", &line)
-                .attr("message", &error.message)
-                .attr("severity", &error.severity);
-            let elem = if let Some(ref source) = error.source {
-                elem.attr("source", source)
-            } else {
-                elem
-            };
-            xml.write(elem).unwrap();
-            xml.write(XmlEvent::end_element()).unwrap();
+    checkstyle.write_xml(&mut xml).unwrap();
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CheckstyleDoc {
+    pub files: HashMap<String, CheckstyleFile>,
+}
+
+impl CheckstyleDoc {
+    fn write_xml<W: Write>(&self, xml: &mut EventWriter<W>) -> Result<(), EmitterError> {
+        xml.write(XmlEvent::start_element("checkstyle"))?;
+        for (filename, file) in &self.files {
+            file.write_xml(xml, filename)?;
         }
-        xml.write(XmlEvent::end_element()).unwrap();
+        xml.write(XmlEvent::end_element())?;
+        Ok(())
     }
-    xml.write(XmlEvent::end_element()).unwrap();
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct CheckstyleFile {
+    pub errors: Vec<CheckstyleError>,
+}
+
+impl CheckstyleFile {
+    fn write_xml<W: Write>(
+        &self,
+        xml: &mut EventWriter<W>,
+        name: &str,
+    ) -> Result<(), EmitterError> {
+        xml.write(XmlEvent::start_element("file").attr("name", name))?;
+        for error in &self.errors {
+            error.write_xml(xml)?;
+        }
+        xml.write(XmlEvent::end_element())?;
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -93,4 +112,24 @@ pub struct CheckstyleError {
     pub message: String,
     pub severity: String,
     pub source: Option<String>,
+}
+
+impl CheckstyleError {
+    fn write_xml<W: Write>(&self, xml: &mut EventWriter<W>) -> Result<(), EmitterError> {
+        let column = self.column.to_string();
+        let line = self.line.to_string();
+        let elem = XmlEvent::start_element("error")
+            .attr("column", &column)
+            .attr("line", &line)
+            .attr("message", &self.message)
+            .attr("severity", &self.severity);
+        let elem = if let Some(ref source) = self.source {
+            elem.attr("source", source)
+        } else {
+            elem
+        };
+        xml.write(elem)?;
+        xml.write(XmlEvent::end_element())?;
+        Ok(())
+    }
 }
