@@ -21,24 +21,36 @@ matrix:
     install:
     - rustup target add x86_64-unknown-linux-musl
     - rustup target add i686-unknown-linux-musl
+    before_script:
+    - mkdir -p dist
     script:
     - cargo build --release --target x86_64-unknown-linux-musl --locked
     - cargo build --release --target i686-unknown-linux-musl --locked
+    - cp target/x86_64-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-unknown-linux-musl
+    - cp target/i686-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-unknown-linux-musl
 
   - env: JOB=dist-osx
     os: osx
     rust: stable
     install:
     - rustup target add i686-apple-darwin
+    before_script:
+    - mkdir -p dist
     script:
     - cargo build --release --target x86_64-apple-darwin --locked
     - cargo build --release --target i686-apple-darwin --locked
+    - cp target/x86_64-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-apple-darwin
+    - cp target/i686-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-apple-darwin
 
   - env: JOB=dist-windows
     os: windows
     rust: stable
     install:
     - rustup target add i686-pc-windows-msvc
+    before_script:
+    - mkdir -p dist
     script:
     - cargo build --release --target x86_64-pc-windows-msvc --locked
     - cargo build --release --target i686-pc-windows-msvc --locked
+    - cp target/x86_64-pc-windows-msvc/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-pc-windows-msvc
+    - cp target/i686-pc-windows-msvc/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-pc-windows-msvc
