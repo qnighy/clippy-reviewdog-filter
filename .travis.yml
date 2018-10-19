@@ -9,8 +9,7 @@ DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
     file: dist/*
     skip_cleanup: true
     on:
-      branch: travis-test  # TODO: remove this
-      # tags: true # TODO: enable this
+      tags: true
 
 matrix:
   include:
