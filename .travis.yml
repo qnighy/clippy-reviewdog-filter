@@ -20,18 +20,25 @@ matrix:
           - musl-tools
     install:
     - rustup target add $TARGET
+    - rustup target add i686-unknown-linux-musl
     script:
     - cargo build --release --target $TARGET --locked
+    - cargo build --release --target i686-unknown-linux-musl --locked
 
   - env: JOB=dist-osx TARGET=x86_64-apple-darwin
     os: osx
     rust: stable
-    install: true
+    install:
+    - rustup target add i686-apple-darwin
     script:
     - cargo build --release --target $TARGET --locked
+    - cargo build --release --target i686-apple-darwin --locked
 
-  - env: JOB=dist-windows
+  - env: JOB=dist-windows TARGET=x86_64-pc-windows-msvc
     os: windows
     rust: stable
+    install:
+    - rustup target add i686-pc-windows-msvc
     script:
-    - cargo build --release --locked
+    - cargo build --target $TARGET --release --locked
+    - cargo build --target i686-pc-windows-msvc --release --locked
