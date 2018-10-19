@@ -11,7 +11,7 @@ matrix:
     - rustup component add rustfmt-preview
     - cargo fmt --all -- --check
 
-  - env: JOB=dist-linux TARGET=x86_64-unknown-linux-musl
+  - env: JOB=dist-linux
     dist: trusty
     rust: stable
     addons:
@@ -19,26 +19,26 @@ matrix:
         packages:
           - musl-tools
     install:
-    - rustup target add $TARGET
+    - rustup target add x86_64-unknown-linux-musl
     - rustup target add i686-unknown-linux-musl
     script:
-    - cargo build --release --target $TARGET --locked
+    - cargo build --release --target x86_64-unknown-linux-musl --locked
     - cargo build --release --target i686-unknown-linux-musl --locked
 
-  - env: JOB=dist-osx TARGET=x86_64-apple-darwin
+  - env: JOB=dist-osx
     os: osx
     rust: stable
     install:
     - rustup target add i686-apple-darwin
     script:
-    - cargo build --release --target $TARGET --locked
+    - cargo build --release --target x86_64-apple-darwin --locked
     - cargo build --release --target i686-apple-darwin --locked
 
-  - env: JOB=dist-windows TARGET=x86_64-pc-windows-msvc
+  - env: JOB=dist-windows
     os: windows
     rust: stable
     install:
     - rustup target add i686-pc-windows-msvc
     script:
-    - cargo build --target $TARGET --release --locked
+    - cargo build --target x86_64-pc-windows-msvc --release --locked
     - cargo build --target i686-pc-windows-msvc --release --locked
