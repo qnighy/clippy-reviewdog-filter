@@ -14,7 +14,7 @@ DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
 
 matrix:
   include:
-  - env: JOB=test RUST_BACKTRACE=1
+  - env: JOB=test
     dist: trusty
     rust: stable
     script:
