@@ -1,5 +1,16 @@
 language: rust
 sudo: false
+DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
+  deploy:
+    provider: releases
+    api_key:
+      secure: k/+T21zmxu4JTgA5uqQ3K+MPvV2CReYX713EjUYI0LYaD3G18HZ5OOm84tNntjne9RrSWP77S3N+iDQddaTNt6lRQJIGYSnZNxPO+DjYWkEiDTlZ+8RO1Q20HPv8OkvRuSKTzfL1fhU9SzFfmToERHal/5oVXBPjxVXhKA1Li6vAk4WBI2AMuBNgRx3OhBo0DFI28SXwtCk6OIH3kzRtUhw2tL+Muc9HPqwldceHJgUjpC1ekV73+hxx2zuptY/Yqy1MsFi1mHkqRpW3dNTkmoNmOlMBiPRMqYrmGfVI/y76GJYhzaJ8ovmmUC1LoaP9mMOYtAlqWmqELHo3NxT0hD88M23ADDVIdYdymdRKESZfMvONZZCOA8Nr1kuvXpnr9SVIU7sYx8UTfOLPJY8dqPm6deUz70rH0D3QoJG7ncVd9BSSfhPZ80Yqx/nZeFdrAdOZxHMONfEk7ylct9mKsGgczKrtTu1+Lb3Ug9RtgE2ZVVkQ5UqWvGEaNPLLzsyqdKIbMoo8GyZyAebmZ7RYLElk+PLkp5MxpyIARYFqXzDrDk2sqciolXz0pz/d7ERUe32gVO5wRfuhB4ZzUgK0B25Wr9Uk8j2GO+EVMqJS6RHOxROewzj1epuHgMC3/n7pqH4EZX4HIs/GIIbFkLhYWl6t2hkQxrMFcgi1+1yhkFQ=
+    file_glob: true
+    file: dist/*
+    skip_cleanup: true
+    on:
+      branch: travis-test  # TODO: remove this
+      tags: true
 
 matrix:
   include:
@@ -28,6 +39,7 @@ matrix:
     - cargo build --release --target i686-unknown-linux-musl --locked
     - cp target/x86_64-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-unknown-linux-musl
     - cp target/i686-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-unknown-linux-musl
+    <<: *DEPLOY_TO_GITHUB
 
   - env: JOB=dist-osx
     os: osx
@@ -41,6 +53,7 @@ matrix:
     - cargo build --release --target i686-apple-darwin --locked
     - cp target/x86_64-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-apple-darwin
     - cp target/i686-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-apple-darwin
+    <<: *DEPLOY_TO_GITHUB
 
   - env: JOB=dist-windows
     os: windows
@@ -54,3 +67,4 @@ matrix:
     - cargo build --release --target i686-pc-windows-msvc --locked
     - cp target/x86_64-pc-windows-msvc/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-pc-windows-msvc
     - cp target/i686-pc-windows-msvc/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-pc-windows-msvc
+    <<: *DEPLOY_TO_GITHUB
