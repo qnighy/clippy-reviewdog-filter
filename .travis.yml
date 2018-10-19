@@ -23,6 +23,7 @@ matrix:
     - cargo fmt --all -- --check
 
   - env: JOB=dist-linux
+    if: tag IS present
     dist: trusty
     rust: stable
     addons:
@@ -42,6 +43,7 @@ matrix:
     <<: *DEPLOY_TO_GITHUB
 
   - env: JOB=dist-osx
+    if: tag IS present
     os: osx
     rust: stable
     install:
@@ -56,6 +58,7 @@ matrix:
     <<: *DEPLOY_TO_GITHUB
 
   - env: JOB=dist-windows
+    if: tag IS present
     os: windows
     rust: stable
     install:
