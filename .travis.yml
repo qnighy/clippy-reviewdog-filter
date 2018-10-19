@@ -1,0 +1,72 @@
+language: rust
+sudo: false
+DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
+  deploy:
+    provider: releases
+    api_key:
+      secure: k/+T21zmxu4JTgA5uqQ3K+MPvV2CReYX713EjUYI0LYaD3G18HZ5OOm84tNntjne9RrSWP77S3N+iDQddaTNt6lRQJIGYSnZNxPO+DjYWkEiDTlZ+8RO1Q20HPv8OkvRuSKTzfL1fhU9SzFfmToERHal/5oVXBPjxVXhKA1Li6vAk4WBI2AMuBNgRx3OhBo0DFI28SXwtCk6OIH3kzRtUhw2tL+Muc9HPqwldceHJgUjpC1ekV73+hxx2zuptY/Yqy1MsFi1mHkqRpW3dNTkmoNmOlMBiPRMqYrmGfVI/y76GJYhzaJ8ovmmUC1LoaP9mMOYtAlqWmqELHo3NxT0hD88M23ADDVIdYdymdRKESZfMvONZZCOA8Nr1kuvXpnr9SVIU7sYx8UTfOLPJY8dqPm6deUz70rH0D3QoJG7ncVd9BSSfhPZ80Yqx/nZeFdrAdOZxHMONfEk7ylct9mKsGgczKrtTu1+Lb3Ug9RtgE2ZVVkQ5UqWvGEaNPLLzsyqdKIbMoo8GyZyAebmZ7RYLElk+PLkp5MxpyIARYFqXzDrDk2sqciolXz0pz/d7ERUe32gVO5wRfuhB4ZzUgK0B25Wr9Uk8j2GO+EVMqJS6RHOxROewzj1epuHgMC3/n7pqH4EZX4HIs/GIIbFkLhYWl6t2hkQxrMFcgi1+1yhkFQ=
+    file_glob: true
+    file: dist/*
+    skip_cleanup: true
+    on:
+      tags: true
+
+matrix:
+  include:
+  - env: JOB=test
+    dist: trusty
+    rust: stable
+    script:
+    - cargo test --all --locked
+    - rustup component add rustfmt-preview
+    - cargo fmt --all -- --check
+
+  - env: JOB=dist-linux
+    if: tag IS present
+    dist: trusty
+    rust: stable
+    addons:
+      apt:
+        packages:
+          - musl-tools
+    install:
+    - rustup target add x86_64-unknown-linux-musl
+    - rustup target add i686-unknown-linux-musl
+    before_script:
+    - mkdir -p dist
+    script:
+    - cargo build --release --target x86_64-unknown-linux-musl --locked
+    - cargo build --release --target i686-unknown-linux-musl --locked
+    - cp target/x86_64-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-unknown-linux-musl
+    - cp target/i686-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-unknown-linux-musl
+    <<: *DEPLOY_TO_GITHUB
+
+  - env: JOB=dist-osx
+    if: tag IS present
+    os: osx
+    rust: stable
+    install:
+    - rustup target add i686-apple-darwin
+    before_script:
+    - mkdir -p dist
+    script:
+    - cargo build --release --target x86_64-apple-darwin --locked
+    - cargo build --release --target i686-apple-darwin --locked
+    - cp target/x86_64-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-apple-darwin
+    - cp target/i686-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-apple-darwin
+    <<: *DEPLOY_TO_GITHUB
+
+  - env: JOB=dist-windows
+    if: tag IS present
+    os: windows
+    rust: stable
+    install:
+    - rustup target add i686-pc-windows-msvc
+    before_script:
+    - mkdir -p dist
+    script:
+    - cargo build --release --target x86_64-pc-windows-msvc --locked
+    - cargo build --release --target i686-pc-windows-msvc --locked
+    - cp target/x86_64-pc-windows-msvc/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-pc-windows-msvc
+    - cp target/i686-pc-windows-msvc/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-pc-windows-msvc
+    <<: *DEPLOY_TO_GITHUB
