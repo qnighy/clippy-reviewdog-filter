@@ -4,6 +4,7 @@ sudo: false
 matrix:
   include:
   - env: JOB=test RUST_BACKTRACE=1
+    dist: trusty
     rust: stable
     script:
     - cargo test --all --locked
@@ -11,7 +12,7 @@ matrix:
     - cargo fmt --all -- --check
 
   - env: JOB=dist-linux TARGET=x86_64-unknown-linux-musl
-    os: trusty
+    dist: trusty
     rust: stable
     addons:
       apt:
