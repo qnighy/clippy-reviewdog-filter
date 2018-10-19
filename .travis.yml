@@ -9,3 +9,22 @@ matrix:
     - cargo test --all --locked
     - rustup component add rustfmt-preview
     - cargo fmt --all -- --check
+
+  - env: JOB=dist-linux TARGET=x86_64-unknown-linux-musl
+    os: trusty
+    rust: stable
+    addons:
+      apt:
+        packages:
+          - musl-tools
+    install:
+    - rustup target add $TARGET
+    script:
+    - cargo build --release --target $TARGET --locked
+
+  - env: JOB=dist-osx TARGET=x86_64-apple-darwin
+    os: osx
+    rust: stable
+    install: true
+    script:
+    - cargo build --release --target $TARGET --locked
