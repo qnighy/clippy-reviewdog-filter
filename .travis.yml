@@ -1,0 +1,11 @@
+language: rust
+sudo: false
+
+matrix:
+  include:
+  - env: JOB=test RUST_BACKTRACE=1
+    rust: stable
+    script:
+    - cargo test --all --locked
+    - rustup component add rustfmt-preview
+    - cargo fmt --all -- --check
