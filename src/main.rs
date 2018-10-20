@@ -61,6 +61,7 @@ mod tests {
     fn test_from_reader() -> io::Result<()> {
         let options = checkstyle::Options {
             include_rendered: false,
+            redirect_to_stderr: true,
         };
         let reader = Cursor::new(include_bytes!("sample.txt").to_vec());
         let checkstyle = CheckstyleDoc::from_reader(reader, &options)?;
