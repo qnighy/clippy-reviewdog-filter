@@ -10,6 +10,7 @@ use message::Message;
 #[derive(Debug, Clone)]
 pub struct Options {
     pub include_rendered: bool,
+    pub redirect_to_stderr: bool,
 }
 
 #[derive(Debug, Clone, Default)]
@@ -24,6 +25,9 @@ impl CheckstyleDoc {
         for line in r.lines() {
             let line = line?;
             if !line.starts_with("{") {
+                if opts.redirect_to_stderr {
+                    eprintln!("{}", line.trim_right_matches("\n"));
+                }
                 continue;
             }
             let msg: Message = serde_json::from_str(&line)?;

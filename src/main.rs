@@ -37,6 +37,7 @@ fn main() {
 
     let options = checkstyle::Options {
         include_rendered: args.is_present("include-rendered"),
+        redirect_to_stderr: true,
     };
 
     let stdin = io::stdin();
