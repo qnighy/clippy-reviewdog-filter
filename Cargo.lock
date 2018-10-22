@@ -50,7 +50,7 @@ dependencies = [
 
 [[package]]
 name = "clippy-reviewdog-filter"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap 2.32.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.5.13 (registry+https://github.com/rust-lang/crates.io-index)",

@@ -26,7 +26,7 @@ fn main() {
     env_logger::init();
 
     let args = App::new("clippy-reviewdog-filter")
-        .version("0.1.0")
+        .version("0.1.1")
         .author("Masaki Hara <ackie.h.gmai@gmail.com>")
         .about("Converts cargo check / cargo clippy output into checkstyle-like XML.")
         .arg(
