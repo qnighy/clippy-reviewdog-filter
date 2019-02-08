@@ -33,7 +33,8 @@ fn main() {
             Arg::with_name("include-rendered")
                 .long("include-rendered")
                 .help("include rendered messages"),
-        ).get_matches();
+        )
+        .get_matches();
 
     let options = checkstyle::Options {
         include_rendered: args.is_present("include-rendered"),
