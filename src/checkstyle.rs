@@ -26,7 +26,7 @@ impl CheckstyleDoc {
             let line = line?;
             if !line.starts_with("{") {
                 if opts.redirect_to_stderr {
-                    eprintln!("{}", line.trim_right_matches("\n"));
+                    eprintln!("{}", line.trim_end_matches("\n"));
                 }
                 continue;
             }
