@@ -1,16 +1,16 @@
-extern crate env_logger;
-extern crate log;
+use env_logger;
 
-extern crate clap;
 
-extern crate semver;
 
-extern crate serde;
+
+
+
+
 #[macro_use]
 extern crate serde_derive;
-extern crate serde_json;
 
-extern crate xml;
+
+
 
 pub mod checkstyle;
 pub mod message;
