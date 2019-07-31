@@ -20,7 +20,7 @@ use std::io;
 use clap::{App, Arg};
 use xml::writer::EventWriter;
 
-use checkstyle::CheckstyleDoc;
+use crate::checkstyle::CheckstyleDoc;
 
 fn main() {
     env_logger::init();

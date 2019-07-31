@@ -4,8 +4,8 @@ use std::io::{self, BufRead, Write};
 use serde_json;
 use xml::writer::{Error as EmitterError, EventWriter, XmlEvent};
 
-use message::compiler_message::ErrorLevel;
-use message::Message;
+use crate::message::compiler_message::ErrorLevel;
+use crate::message::Message;
 
 #[derive(Debug, Clone)]
 pub struct Options {
