@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 
-use serde_json;
 use xml::writer::{Error as EmitterError, EventWriter, XmlEvent};
 
 use crate::message::compiler_message::ErrorLevel;
