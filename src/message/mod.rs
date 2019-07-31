@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 pub mod compiler_message;
 mod package_id;
 mod target;
