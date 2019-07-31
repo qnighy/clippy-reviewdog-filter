@@ -1,11 +1,10 @@
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
 
-use serde_json;
 use xml::writer::{Error as EmitterError, EventWriter, XmlEvent};
 
-use message::compiler_message::ErrorLevel;
-use message::Message;
+use crate::message::compiler_message::ErrorLevel;
+use crate::message::Message;
 
 #[derive(Debug, Clone)]
 pub struct Options {
@@ -26,7 +25,7 @@ impl CheckstyleDoc {
             let line = line?;
             if !line.starts_with("{") {
                 if opts.redirect_to_stderr {
-                    eprintln!("{}", line.trim_right_matches("\n"));
+                    eprintln!("{}", line.trim_end_matches("\n"));
                 }
                 continue;
             }

@@ -1,4 +1,3 @@
-use semver;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

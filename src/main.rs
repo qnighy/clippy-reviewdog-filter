@@ -1,16 +1,4 @@
-extern crate env_logger;
-extern crate log;
-
-extern crate clap;
-
-extern crate semver;
-
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
-extern crate serde_json;
-
-extern crate xml;
+use env_logger;
 
 pub mod checkstyle;
 pub mod message;
@@ -20,7 +8,7 @@ use std::io;
 use clap::{App, Arg};
 use xml::writer::EventWriter;
 
-use checkstyle::CheckstyleDoc;
+use crate::checkstyle::CheckstyleDoc;
 
 fn main() {
     env_logger::init();
