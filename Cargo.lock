@@ -60,7 +60,7 @@ dependencies = [
  "semver 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.106 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.52 (registry+https://github.com/rust-lang/crates.io-index)",
- "xml-rs 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "xml-rs 0.8.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -336,7 +336,7 @@ dependencies = [
 
 [[package]]
 name = "xml-rs"
-version = "0.8.2"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [metadata]
@@ -383,4 +383,4 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum winapi-util 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)" = "afc5508759c5bf4285e61feb862b6083c8480aec864fa17a81fdec6f69b461ab"
 "checksum winapi-x86_64-pc-windows-gnu 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)" = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 "checksum wincolor 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "561ed901ae465d6185fa7864d63fbd5720d0ef718366c9a4dc83cf6170d7e9ba"
-"checksum xml-rs 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)" = "2bb76e5c421bbbeb8924c60c030331b345555024d56261dae8f3e786ed817c23"
+"checksum xml-rs 0.8.3 (registry+https://github.com/rust-lang/crates.io-index)" = "b07db065a5cf61a7e4ba64f29e67db906fb1787316516c4e6e5ff0fea1efcd8a"
