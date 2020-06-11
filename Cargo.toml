@@ -10,5 +10,5 @@ env_logger = "0.7.1"
 clap = "2.33.1"
 semver = "0.10.0"
 serde = { version = "1.0.111", features = ["derive"] }
-serde_json = "1.0.53"
+serde_json = "1.0.54"
 xml-rs = "0.8.3"
