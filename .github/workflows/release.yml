@@ -1,0 +1,137 @@
+name: release
+
+on:
+  push:
+    branch: ["test-release-*"]
+    tag: ["v*"]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - name: Add targets
+      run:  |
+        rustup target add x86_64-unknown-linux-musl
+        rustup target add i686-unknown-linux-musl
+    - name: Build for Linux (x86_64)
+      run: cargo build --release --target x86_64-unknown-linux-musl --locked
+    - name: Build for Linux (x86)
+      run: cargo build --release --target i686-unknown-linux-musl --locked
+    - run: |
+        mkdir -p dist
+        cp target/x86_64-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-unknown-linux-musl
+        cp target/i686-unknown-linux-musl/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-i686-unknown-linux-musl
+    - name: Upload artifacts for release
+      uses: actions/upload-artifact@v2
+      with:
+        path: dist
+        if-no-files-found: error
+
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - name: Build for macOS (x86_64)
+      run: cargo build --release --target x86_64-apple-darwin --locked
+    - run: |
+        mkdir -p dist
+        cp target/x86_64-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-apple-darwin
+    - name: Upload artifacts for release
+      uses: actions/upload-artifact@v2
+      with:
+        path: dist
+        if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        # target: x86_64-pc-windows-msvc
+        target: i686-pc-windows-msvc
+    - name: Build for Windows (x86_64)
+      run: cargo build --release --target x86_64-pc-windows-msvc --locked
+    - name: Build for Windows (x86)
+      run: cargo build --release --target i686-pc-windows-msvc --locked
+    - run: |
+        mkdir -p dist
+        cp target/x86_64-pc-windows-msvc/release/clippy-reviewdog-filter.exe dist/clippy-reviewdog-filter-x86_64-pc-windows-msvc.exe
+        cp target/i686-pc-windows-msvc/release/clippy-reviewdog-filter.exe dist/clippy-reviewdog-filter-i686-pc-windows-msvc.exe
+    - name: Upload artifacts for release
+      uses: actions/upload-artifact@v2
+      with:
+        path: dist
+        if-no-files-found: error
+
+  create_release:
+    name: Create Release
+    needs: ["build-linux", "build-macos", "build-windows"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts for release
+        uses: actions/download-artifact@v2
+      - run: find .
+      - uses: actions/create-release@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: ${{ startsWith(github.ref, 'refs/heads/') }}
+          prerelease: false
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifact/clippy-reviewdog-filter-x86_64-unknown-linux-musl
+          asset_name: clippy-reviewdog-filter-x86_64-unknown-linux-musl
+          asset_content_type: application/x-executable
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifact/clippy-reviewdog-filter-i686-unknown-linux-musl
+          asset_name: clippy-reviewdog-filter-i686-unknown-linux-musl
+          asset_content_type: application/x-executable
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifact/clippy-reviewdog-filter-x86_64-apple-darwin
+          asset_name: clippy-reviewdog-filter-x86_64-apple-darwin
+          asset_content_type: application/x-mach-binary
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifact/clippy-reviewdog-filter-x86_64-pc-windows-msvc.exe
+          asset_name: clippy-reviewdog-filter-x86_64-pc-windows-msvc.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+      - uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: artifact/clippy-reviewdog-filter-i686-pc-windows-msvc.exe
+          asset_name: clippy-reviewdog-filter-i686-pc-windows-msvc.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
