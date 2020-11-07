@@ -2,8 +2,8 @@ name: release
 
 on:
   push:
-    branch: ["test-release-*"]
-    tag: ["v*"]
+    branches: ["test-release-*"]
+    tags: ["v*"]
 
 jobs:
   build-linux:
