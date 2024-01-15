@@ -37,7 +37,17 @@ fn main() {
     let stdout = io::stdout();
     let stdout = stdout.lock();
     let mut xml = EventWriter::new(stdout);
-    checkstyle.write_xml(&mut xml).expect("Error writing XML");
+    match checkstyle.write_xml(&mut xml) {
+        Ok(_) => {}
+        Err(xml::writer::Error::Io(e)) if e.kind() == io::ErrorKind::BrokenPipe => {
+            // ignore broken pipe
+            std::process::exit(141);
+        }
+        Err(e) => {
+            eprintln!("Error writing XML: {}", e);
+            std::process::exit(1);
+        }
+    }
 }
 
 #[cfg(test)]
