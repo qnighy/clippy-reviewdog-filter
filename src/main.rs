@@ -5,7 +5,7 @@ pub mod message;
 
 use std::io;
 
-use clap::{App, Arg};
+use clap::{Command, Arg, ArgAction};
 use xml::writer::EventWriter;
 
 use crate::checkstyle::CheckstyleDoc;
@@ -13,19 +13,20 @@ use crate::checkstyle::CheckstyleDoc;
 fn main() {
     env_logger::init();
 
-    let args = App::new("clippy-reviewdog-filter")
+    let args = Command::new("clippy-reviewdog-filter")
         .version("0.1.1")
         .author("Masaki Hara <ackie.h.gmai@gmail.com>")
         .about("Converts cargo check / cargo clippy output into checkstyle-like XML.")
         .arg(
-            Arg::with_name("include-rendered")
+            Arg::new("include-rendered")
                 .long("include-rendered")
-                .help("include rendered messages"),
+                .help("include rendered messages")
+                .action(ArgAction::SetTrue),
         )
         .get_matches();
 
     let options = checkstyle::Options {
-        include_rendered: args.is_present("include-rendered"),
+        include_rendered: args.get_flag("include-rendered"),
         redirect_to_stderr: true,
     };
 
