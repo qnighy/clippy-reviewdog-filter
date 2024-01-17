@@ -94,12 +94,11 @@ jobs:
     name: Create Release
     needs: ["build-linux", "build-macos", "build-windows"]
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Download artifacts for release
         uses: actions/download-artifact@v4
         with:
+          path: artifact
           pattern: artifact-*
           merge-multiple: true
       - run: find .
