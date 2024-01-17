@@ -1,7 +1,7 @@
 [package]
 name = "clippy-reviewdog-filter"
 description = "A filter for integrating Clippy with Reviewdog"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Masaki Hara <ackie.h.gmai@gmail.com>"]
 license = "MIT OR Apache-2.0"
