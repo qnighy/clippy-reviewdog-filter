@@ -8,13 +8,13 @@ jobs:
 
     strategy:
       matrix:
-        rust: ["1.47.0", stable, beta, nightly]
+        rust: ["1.75.0", stable, beta, nightly]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        override: true
+      run: |
+        rustup set profile minimal
+        rustup install ${{ matrix.rust }}
+        rustup override set ${{ matrix.rust }}
     - run: cargo test --all --locked

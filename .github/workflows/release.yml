@@ -18,26 +18,26 @@ jobs:
     steps:
     - run: |
         uname -m
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        profile: minimal
-        override: true
-        target: ${{ matrix.target }}
+      run: |
+        rustup set profile minimal
+        rustup install stable
+        rustup target add ${{ matrix.target }}
+        rustup override set stable
+    - name: Install cross
+      run: |
+        cargo install cross
     - name: Build target
-      uses: actions-rs/cargo@v1
-      with:
-        use-cross: true
-        command: build
-        args: --release --target ${{ matrix.target }} --locked
+      run: |
+        cross build --release --target ${{ matrix.target }} --locked
     - run: |
         mkdir -p dist
         cp target/${{ matrix.target }}/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-${{ matrix.target }}
     - name: Upload artifacts for release
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
+        name: artifact-linux-${{ matrix.target }}
         path: dist
         if-no-files-found: error
 
@@ -45,19 +45,21 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
+      run: |
+        rustup set profile minimal
+        rustup install stable
+        rustup override set stable
     - name: Build for macOS (x86_64)
       run: cargo build --release --target x86_64-apple-darwin --locked
     - run: |
         mkdir -p dist
         cp target/x86_64-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-apple-darwin
     - name: Upload artifacts for release
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
+        name: artifact-macos
         path: dist
         if-no-files-found: error
 
@@ -65,13 +67,14 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        # target: x86_64-pc-windows-msvc
-        target: i686-pc-windows-msvc
+      run: |
+        rustup set profile minimal
+        rustup install stable
+        # rustup target add x86_64-pc-windows-msvc
+        rustup target add i686-pc-windows-msvc
+        rustup override set stable
     - name: Build for Windows (x86_64)
       run: cargo build --release --target x86_64-pc-windows-msvc --locked
     - name: Build for Windows (x86)
@@ -81,8 +84,9 @@ jobs:
         cp target/x86_64-pc-windows-msvc/release/clippy-reviewdog-filter.exe dist/clippy-reviewdog-filter-x86_64-pc-windows-msvc.exe
         cp target/i686-pc-windows-msvc/release/clippy-reviewdog-filter.exe dist/clippy-reviewdog-filter-i686-pc-windows-msvc.exe
     - name: Upload artifacts for release
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
+        name: artifact-windows
         path: dist
         if-no-files-found: error
 
@@ -90,64 +94,19 @@ jobs:
     name: Create Release
     needs: ["build-linux", "build-macos", "build-windows"]
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Download artifacts for release
-        uses: actions/download-artifact@v2
-      - run: find .
-      - uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/download-artifact@v4
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          path: artifact
+          pattern: artifact-*
+          merge-multiple: true
+      - run: find .
+      - uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ github.ref }}
+          body: Release ${{ github.ref }}
           draft: ${{ startsWith(github.ref, 'refs/heads/') }}
           prerelease: false
-
-  upload_release:
-    name: Upload Linux Release
-    needs: ["create_release"]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-        - aarch64-unknown-linux-gnu
-        - x86_64-unknown-linux-musl
-        - i686-unknown-linux-musl
-        - x86_64-apple-darwin
-    steps:
-      - name: Download artifacts for release
-        uses: actions/download-artifact@v2
-      - run: find .
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: artifact/clippy-reviewdog-filter-${{ matrix.target }}
-          asset_name: clippy-reviewdog-filter-${{ matrix.target }}
-          asset_content_type: application/x-executable
-
-  upload_windows_release:
-    name: Upload Release
-    needs: ["create_release"]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target:
-        - x86_64-pc-windows-msvc.exe
-        - i686-pc-windows-msvc.exe
-    steps:
-      - name: Download artifacts for release
-        uses: actions/download-artifact@v2
-      - run: find .
-      - uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: artifact/clippy-reviewdog-filter-${{ matrix.target }}
-          asset_name: clippy-reviewdog-filter-${{ matrix.target }}
-          asset_content_type: application/vnd.microsoft.portable-executable
+          files: |
+            artifact/clippy-reviewdog-filter-*
