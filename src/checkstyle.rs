@@ -48,7 +48,7 @@ impl CheckstyleDoc {
                 span.line_start as u32,
             )
         } else {
-            ("<unknown>".to_owned(), 1, 1)
+            return;
         };
         let severity = match msg.message.level {
             ErrorLevel::InternalCompilerError => "error",
