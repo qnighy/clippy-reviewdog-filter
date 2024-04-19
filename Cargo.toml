@@ -15,3 +15,4 @@ semver = "1.0.21"
 serde = { version = "1.0.195", features = ["derive"] }
 serde_json = "1.0.111"
 xml-rs = "0.8.19"
+cargo-util-schemas = "0.2.0"
