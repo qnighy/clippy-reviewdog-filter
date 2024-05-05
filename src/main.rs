@@ -5,7 +5,7 @@ pub mod message;
 
 use std::io;
 
-use clap::{Command, Arg, ArgAction};
+use clap::{Arg, ArgAction, Command};
 use xml::writer::EventWriter;
 
 use crate::checkstyle::CheckstyleDoc;
@@ -85,6 +85,36 @@ mod tests {
         );
         assert_eq!(error1.severity, "warning");
         assert_eq!(error1.source, Some("cast_lossless".to_owned()));
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_from_reader_with_1_77() -> io::Result<()> {
+        let options = checkstyle::Options {
+            include_rendered: false,
+            redirect_to_stderr: true,
+        };
+        let reader = Cursor::new(include_bytes!("sample_1.77.txt").to_vec());
+        let checkstyle = CheckstyleDoc::from_reader(reader, &options)?;
+        dbg!(&checkstyle);
+        assert_eq!(checkstyle.files.len(), 1);
+        let file = &checkstyle.files["src/main.rs"];
+        assert_eq!(file.errors.len(), 2);
+
+        let error0 = &file.errors[0];
+        assert_eq!(error0.column, 9);
+        assert_eq!(error0.line, 5);
+        assert_eq!(error0.message, "unused variable: `x`");
+        assert_eq!(error0.severity, "warning");
+        assert_eq!(error0.source, Some("unused_variables".to_owned()));
+
+        let error1 = &file.errors[1];
+        assert_eq!(error1.column, 13);
+        assert_eq!(error1.line, 5);
+        assert_eq!(error1.message, "casting function pointer `fun` to `i64`");
+        assert_eq!(error1.severity, "warning");
+        assert_eq!(error1.source, Some("clippy::fn_to_numeric_cast".to_owned()));
 
         Ok(())
     }

@@ -1,3 +1,4 @@
+use cargo_util_schemas::core::PackageIdSpec;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -22,6 +23,17 @@ impl<'de> Deserialize<'de> for PackageId {
 
         let string = String::deserialize(d)?;
 
+        // deserialize with Package ID Specifications (stabillized in Rust 1.77.0)
+        // https://doc.rust-lang.org/stable/cargo/reference/pkgid-spec.html
+        if let Ok(pkg) = PackageIdSpec::parse(&string) {
+            return Ok(Self {
+                name: pkg.name().to_string(),
+                version: pkg.version().unwrap(),
+                source_id: pkg.url().unwrap().to_string(),
+            });
+        }
+
+        // fallback to original package_id deserializer
         let mut s = string.splitn(3, " ");
         let name = s.next().unwrap();
         if name == "" {
