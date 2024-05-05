@@ -10,6 +10,7 @@ repository = "https://github.com/qnighy/clippy-reviewdog-filter"
 [dependencies]
 log = "0.4.20"
 env_logger = "0.10.1"
+regex = "1.10.4"
 clap = "4.4.17"
 semver = "1.0.21"
 serde = { version = "1.0.195", features = ["derive"] }

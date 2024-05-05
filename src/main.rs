@@ -5,7 +5,7 @@ pub mod message;
 
 use std::io;
 
-use clap::{Command, Arg, ArgAction};
+use clap::{Arg, ArgAction, Command};
 use xml::writer::EventWriter;
 
 use crate::checkstyle::CheckstyleDoc;

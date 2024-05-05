@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 use std::io::{self, BufRead, Write};
+use std::sync::OnceLock;
 
+use regex::Regex;
 use xml::writer::{Error as EmitterError, EventWriter, XmlEvent};
 
 use crate::message::compiler_message::ErrorLevel;
@@ -47,8 +49,12 @@ impl CheckstyleDoc {
                 span.column_start as u32,
                 span.line_start as u32,
             )
-        } else {
+        } else if likely_error_count_message(&msg.message.message) {
+            // Error count summary doesn't suit the purpose of reviewdog.
+            // Just throw it away.
             return;
+        } else {
+            ("<unknown>".to_owned(), 1, 1)
         };
         let severity = match msg.message.level {
             ErrorLevel::InternalCompilerError => "error",
@@ -105,6 +111,15 @@ impl CheckstyleFile {
     }
 }
 
+fn likely_error_count_message(msg: &str) -> bool {
+    static ERROR_COUNT_RE: OnceLock<Regex> = OnceLock::new();
+
+    // https://github.com/rust-lang/rust/blob/1.78.0/compiler/rustc_errors/src/lib.rs#L915-L924
+    let re = ERROR_COUNT_RE.get_or_init(|| Regex::new(r#"^(?:aborting due to \d+ previous errors?(?:; \d+ warnings? emitted)?|\d+ warnings? emitted)$"#).unwrap());
+
+    re.is_match(msg)
+}
+
 #[derive(Debug, Clone)]
 pub struct CheckstyleError {
     pub column: u32,
@@ -131,5 +146,36 @@ impl CheckstyleError {
         xml.write(elem)?;
         xml.write(XmlEvent::end_element())?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_likely_error_count_messages() {
+        assert!(!likely_error_count_message(""));
+        assert!(!likely_error_count_message("unused variable: `x`"));
+        assert!(likely_error_count_message(
+            "aborting due to 1 previous error"
+        ));
+        assert!(likely_error_count_message(
+            "aborting due to 12 previous errors"
+        ));
+        assert!(likely_error_count_message("1 warning emitted"));
+        assert!(likely_error_count_message("34 warnings emitted"));
+        assert!(likely_error_count_message(
+            "aborting due to 1 previous error; 1 warning emitted"
+        ));
+        assert!(likely_error_count_message(
+            "aborting due to 1 previous error; 34 warning emitted"
+        ));
+        assert!(likely_error_count_message(
+            "aborting due to 12 previous errors; 1 warnings emitted"
+        ));
+        assert!(likely_error_count_message(
+            "aborting due to 12 previous errors; 34 warnings emitted"
+        ));
     }
 }
