@@ -8,7 +8,7 @@ jobs:
 
     strategy:
       matrix:
-        rust: ["1.75.0", stable, beta, nightly]
+        rust: ["1.76.0", stable, beta, nightly]
 
     steps:
     - uses: actions/checkout@v4
