@@ -43,6 +43,11 @@ jobs:
 
   build-macos:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        target:
+        - x86_64-apple-darwin
+        - aarch64-apple-darwin
 
     steps:
     - uses: actions/checkout@v4
@@ -50,16 +55,17 @@ jobs:
       run: |
         rustup set profile minimal
         rustup install stable
+        rustup target add ${{ matrix.target }}
         rustup override set stable
     - name: Build for macOS (x86_64)
-      run: cargo build --release --target x86_64-apple-darwin --locked
+      run: cargo build --release --target ${{ matrix.target }} --locked
     - run: |
         mkdir -p dist
-        cp target/x86_64-apple-darwin/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-x86_64-apple-darwin
+        cp target/${{ matrix.target }}/release/clippy-reviewdog-filter dist/clippy-reviewdog-filter-${{ matrix.target }}
     - name: Upload artifacts for release
       uses: actions/upload-artifact@v4
       with:
-        name: artifact-macos
+        name: artifact-macos-${{ matrix.target }}
         path: dist
         if-no-files-found: error
 
